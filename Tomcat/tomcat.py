@@ -1,51 +1,64 @@
 #!/bin/python
-import os
-import subprocess
 
-HOME=/u01/tomcat
-PID=subprocess.Popen(ps -ef | grep catalina | grep -v grep | awk '{print $2}',shell=True)
+import os,subprocess,sys,time
 
-def usage():
-	print "1)Status "
-	print "2)Stop "
-	print "3)Start "
-	print "4)Restart "
-	return()
+path = '/usr/apache/apache-tomcat-9.0.0.M3/bin'
+sec = 5
+process = "ps -ef | grep -v grep | grep " + path + " | wc -l"
+pid = 'ps -ef | grep -v grep | grep ' + path + ' | awk \'{print $2}\''
+
+print "Welcome to Tomcat Restart Python Script"
+print "1)Status "
+print "2)Start "
+print "3)Stop "
+print "4)Restart "
+
+
 def status():
-	if PID == 0:
-		print "Tomcat service is not running"
-	else:
-		print "Tomcat service is running"
-	return status()
-def stop():
-	subprocess.Popen('HOME/bin/shutdown.sh',shell=True)
-	return stop()
+        tpid = subprocess.Popen(process,stdout=subprocess.PIPE,shell=True)
+        opt, err = tpid.communicate()
+        if int(opt) < 1:
+                print "Tomcat process is not running"
+        else:
+                print "Tomcat process is running"
+        return()
+
 def start():
-	subprocess.Popen('HOME/bin/startup.sh',shell=True)
-	return start()
+        subprocess.call(path + "/startup.sh",stdout=subprocess.PIPE,shell=True)
+        return()
+
+def stop():
+        subprocess.call(path + "/shutdown.sh",stdout=subprocess.PIPE,shell=True)
+        return()
+
 def restart():
-	if PID == 0:
-		subprocess.Popen('HOME/bin/startup.sh',shell=True)
-	else:
-		subprocess.Popen('HOME/bin/shutdown.sh',shell=True)
-		time.sleep(60)
-		PID=subprocess.Popen(ps -ef | grep catalina | grep -v grep | awk '{print $2}',shell=True)
-		if PID == 0:
-			 subprocess.Popen('HOME/bin/startup.sh',shell=True)
-		else:
-			subprocess.Popen('kill - 9 PID',shell=True)
-			subprocess.Popen('HOME/bin/startup.sh',shell=True)			
-	return restart()
+        tpid = subprocess.Popen(process,stdout=subprocess.PIPE,shell=True)
+        opt, err = tpid.communicate()
+        if int(opt) < 1:
+                subprocess.Popen([path + "/startup.sh"], stdout=subprocess.PIPE)
+        else:
+                subprocess.Popen([path + "/shutdown.sh"], stdout=subprocess.PIPE)
+                time.sleep(sec)
+                tpid = subprocess.Popen(process,stdout=subprocess.PIPE,shell=True)
+                opt, err = tpid.communicate()
+                if int(opt) < 1:
+                        subprocess.Popen([path + "/startup.sh"], stdout=subprocess.PIPE)
+                else:
+                        tpid = subprocess.Popen([pid], stdout=subprocess.PIPE, shell=True)
+                        out, err = tPid.communicate()
+                        subprocess.Popen(["kill -9 out"], stdout=subprocess.PIPE, shell=True)
+                        print "Tomcat failed to shutdown, so killed with PID " + out
+                        subprocess.Popen([path + "/startup.sh"], stdout=subprocess.PIPE)
+        return()
 
-choice = input("Enter your choice : ")
+choice = input("Enter your Choice : ")
 
-if choice == 1:
-	status()
+if choice  == 1:
+        status()
 elif choice == 2:
-	stop()
+        start()
 elif choice == 3:
-	start()
+        stop()
 elif choice == 4:
-	restart()
-elif choice >= 4:
-	print "Invalid Entry"
+        restart()
+
