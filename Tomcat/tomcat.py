@@ -53,6 +53,8 @@ def restart():
 
 choice = input("Enter your Choice : ")
 
+if choice > 4:
+	print "Invalid Choice, Please go tthrough the usage again"
 if choice  == 1:
         status()
 elif choice == 2:
